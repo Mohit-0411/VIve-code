@@ -35,6 +35,8 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+## Tech Stack
+
 1. Framework & Architecture
 Next.js (App Router): Powers the frontend, routing (app/ directory), dynamic pages ([slug]), and server-side data fetching.
 

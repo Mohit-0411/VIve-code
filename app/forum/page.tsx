@@ -1,158 +1,121 @@
-import { createClient } from 'next-sanity'
-import { revalidatePath } from 'next/cache'
+import { client } from '@/sanity/lib/client'
+import Link from 'next/link'
+import Badge from '@/components/Badge'
+import { MessageSquare, Heart, PlusCircle, User, Sparkles } from 'lucide-react'
 
-const readClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
-  apiVersion: '2024-01-01',
-  useCdn: false,
-})
-
-const writeClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
-  apiVersion: '2024-01-01',
-  token: process.env.SANITY_WRITE_TOKEN,
-  useCdn: false,
-})
+export const revalidate = 0
 
 async function getForumPosts() {
-  return readClient.fetch(
-    `*[_type == "forumPost"] | order(createdAt desc) {
+  return await client.fetch(`
+    *[_type == "forumPost"] | order(_createdAt desc){
       _id,
       title,
       author,
       category,
       content,
-      createdAt
-    }`
-  )
+      likes,
+      repliesCount,
+      _createdAt,
+      "slug": slug.current
+    }
+  `)
 }
 
 export default async function ForumPage() {
   const posts = await getForumPosts()
 
-  async function createPost(formData: FormData) {
-    'use server'
-
-    const title = formData.get('title') as string
-    const author = formData.get('author') as string
-    const category = formData.get('category') as string
-    const content = formData.get('content') as string
-
-    if (!title || !author || !content) return
-
-    await writeClient.create({
-      _type: 'forumPost',
-      title,
-      author,
-      category: category || 'Poetry',
-      content,
-      createdAt: new Date().toISOString(),
-    })
-
-    revalidatePath('/forum')
-  }
-
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100 pt-28 px-6 max-w-4xl mx-auto pb-16">
-      <p className="text-amber-400 text-sm tracking-widest uppercase mb-2">Community Corner</p>
-      <h1 className="text-5xl font-bold mb-4">Poetry & Stories</h1>
-      <p className="text-stone-400 mb-12">
-        Share your creative writings with fellow literary enthusiasts.
-      </p>
-
-      {/* Submission Form */}
-      <section className="bg-stone-900 border border-stone-800 rounded-2xl p-6 mb-16">
-        <h2 className="text-2xl font-semibold mb-6 text-amber-400">Publish Your Work</h2>
-        <form action={createPost} className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-stone-400 mb-1">Title</label>
-              <input
-                type="text"
-                name="title"
-                required
-                placeholder="Title of your work"
-                className="w-full bg-stone-950 border border-stone-800 rounded-lg p-3 text-stone-100 focus:outline-none focus:border-amber-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-stone-400 mb-1">Author</label>
-              <input
-                type="text"
-                name="author"
-                required
-                placeholder="Your name or alias"
-                className="w-full bg-stone-950 border border-stone-800 rounded-lg p-3 text-stone-100 focus:outline-none focus:border-amber-400"
-              />
-            </div>
-          </div>
-
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 pt-28 pb-20 px-6 max-w-5xl mx-auto">
+      {/* Forum Banner Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/10 via-purple-500/10 to-rose-500/10 border border-stone-200 dark:border-stone-800 p-8 md:p-10 mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
-            <label className="block text-sm text-stone-400 mb-1">Category</label>
-            <select
-              name="category"
-              className="w-full bg-stone-950 border border-stone-800 rounded-lg p-3 text-stone-100 focus:outline-none focus:border-amber-400"
-            >
-              <option value="Poetry">Poetry</option>
-              <option value="Story">Story</option>
-            </select>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold mb-3">
+              <Sparkles className="w-3.5 h-3.5" />
+              Community Discussions
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+              Literary <span className="bg-gradient-to-r from-amber-500 to-rose-500 bg-clip-text text-transparent">Forum</span>
+            </h1>
+            <p className="text-stone-600 dark:text-stone-400 text-sm md:text-base mt-2 max-w-lg">
+              Exchange insights, ask questions, share book reviews, and connect with fellow literature enthusiasts.
+            </p>
           </div>
 
-          <div>
-            <label className="block text-sm text-stone-400 mb-1">Content</label>
-            <textarea
-              name="content"
-              rows={6}
-              required
-              placeholder="Write your poem or story..."
-              className="w-full bg-stone-950 border border-stone-800 rounded-lg p-3 text-stone-100 focus:outline-none focus:border-amber-400 whitespace-pre-wrap"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="self-start bg-amber-400 text-stone-950 font-semibold px-6 py-3 rounded-lg hover:bg-amber-300 transition mt-2"
+          <Link
+            href="/forum/new"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-semibold shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 hover:scale-105 transition-all whitespace-nowrap"
           >
-            Submit Post
-          </button>
-        </form>
-      </section>
-
-      {/* Posts List */}
-      <section>
-        <h2 className="text-3xl font-bold mb-8">Recent Contributions</h2>
-        <div className="flex flex-col gap-6">
-          {posts.length === 0 && (
-            <p className="text-stone-500">No submissions yet. Be the first to share your work!</p>
-          )}
-          {posts.map((post: any) => (
-            <article
-              key={post._id}
-              className="border border-stone-800 bg-stone-950 rounded-xl p-6 hover:border-stone-700 transition"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-amber-400 text-xs uppercase tracking-widest font-semibold">
-                  {post.category ?? 'Poetry'}
-                </span>
-                {post.createdAt && (
-                  <span className="text-stone-500 text-xs">
-                    {new Date(post.createdAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </span>
-                )}
-              </div>
-              <h3 className="text-2xl font-semibold text-stone-100 mb-1">{post.title}</h3>
-              <p className="text-stone-400 text-sm mb-4">By {post.author}</p>
-              <p className="text-stone-300 whitespace-pre-line leading-relaxed">{post.content}</p>
-            </article>
-          ))}
+            <PlusCircle className="w-5 h-5" />
+            Start Discussion
+          </Link>
         </div>
-      </section>
-    </main>
+      </div>
+
+      {/* Discussion Feed */}
+      <div className="space-y-4">
+        {posts.map((post: any) => {
+          const postDate = post._createdAt ? new Date(post._createdAt) : null
+          const formattedDate = postDate
+            ? postDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              })
+            : 'Recently'
+
+          return (
+            <Link
+              key={post._id}
+              href={`/forum/${post.slug || post._id}`}
+              className="group block bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800/80 rounded-2xl p-6 transition-all duration-300 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5 hover:-translate-y-0.5"
+            >
+              <div className="flex items-start justify-between gap-4 mb-3">
+                {/* Author Details */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 p-[2px]">
+                    <div className="w-full h-full bg-stone-100 dark:bg-stone-900 rounded-full flex items-center justify-center text-stone-700 dark:text-stone-300">
+                      <User className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-stone-800 dark:text-stone-200">
+                      {post.author || 'Anonymous Writer'}
+                    </h3>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                      {formattedDate}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Category Pill */}
+                {post.category && <Badge category={post.category} />}
+              </div>
+
+              {/* Title & Content Preview */}
+              <h2 className="text-lg font-bold mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                {post.title}
+              </h2>
+              {post.content && (
+                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2 mb-4 leading-relaxed">
+                  {post.content}
+                </p>
+              )}
+
+              {/* Stats Footer */}
+              <div className="flex items-center gap-6 pt-3 border-t border-stone-100 dark:border-stone-800/60 text-xs font-medium text-stone-500 dark:text-stone-400">
+                <div className="flex items-center gap-1.5 hover:text-rose-500 transition-colors">
+                  <Heart className="w-4 h-4 text-rose-500/80" />
+                  <span>{post.likes || 0} Likes</span>
+                </div>
+                <div className="flex items-center gap-1.5 hover:text-amber-500 transition-colors">
+                  <MessageSquare className="w-4 h-4 text-amber-500/80" />
+                  <span>{post.repliesCount || 0} Replies</span>
+                </div>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
   )
 }

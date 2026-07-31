@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity'
 
-export default defineType({
+export const speaker = defineType({
   name: 'speaker',
   title: 'Speaker',
   type: 'document',
@@ -9,31 +9,27 @@ export default defineType({
       name: 'name',
       title: 'Name',
       type: 'string',
-    }),
-    defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: {
-        source: 'name',
-        maxLength: 96,
-      },
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'role',
-      title: 'Role',
+      title: 'Role / Designation',
       type: 'string',
+      description: 'e.g., Poet & Author, Literary Critic',
     }),
     defineField({
-      name: 'bio',
-      title: 'Bio',
-      type: 'text',
-    }),
-    defineField({
-      name: 'photo', // Matched to your Sanity Studio data
-      title: 'Photo',
+      name: 'image',
+      title: 'Profile Image',
       type: 'image',
       options: { hotspot: true },
     }),
+    defineField({
+      name: 'bio',
+      title: 'Bio / About',
+      type: 'text',
+      description: 'A short biography of the speaker.',
+    }),
   ],
 })
+// At the bottom of sanity/schemaTypes/speaker.ts
+export default speaker

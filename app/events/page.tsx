@@ -1,132 +1,216 @@
+import Link from 'next/link'
 import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
-import Link from 'next/link'
-import Badge from '@/components/Badge'
-import { Calendar, MapPin, ArrowRight, Sparkles } from 'lucide-react'
+import {
+  Sparkles,
+  Calendar,
+  MapPin,
+  Clock,
+  ArrowRight,
+  BookOpen,
+  Theater,
+  GraduationCap,
+  Tag,
+} from 'lucide-react'
 
 export const revalidate = 0
 
 async function getEvents() {
-  return await client.fetch(`
-    *[_type == "event"] | order(date desc) {
+  const events = await client.fetch(
+    `*[_type == "event"] | order(date asc){
       _id,
       title,
+      description,
       date,
+      time,
+      venue,
       location,
       category,
-      excerpt,
-      image,
+      "bannerImage": coalesce(bannerImage, image),
       "slug": slug.current
-    }
-  `)
+    }`
+  )
+  return events
 }
 
 export default async function EventsPage() {
   const events = await getEvents()
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 pt-28 pb-20 px-6 max-w-6xl mx-auto">
-      {/* Header Section */}
-      <div className="max-w-2xl mb-12 space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          Literary Gatherings
-        </div>
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-          Explore Events
-        </h1>
-        <p className="text-stone-600 dark:text-stone-400 text-base leading-relaxed">
-          Join literary discussions, poetry sessions, book launches, and workshops organized by Sahityik.
-        </p>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      {/* Top Academic Banner */}
+      <div className="bg-blue-950 text-blue-100 py-2.5 px-4 text-xs md:text-sm text-center border-b border-blue-800/50 font-medium">
+        <span className="opacity-80">Affiliated to Purbanchal University — </span>
+        <strong className="text-white font-semibold">
+          GOMENDRA MULTIPLE COLLEGE
+        </strong>
+        <span className="opacity-80"> | Birtamode-4, Jhapa</span>
       </div>
 
-      {/* Events Grid */}
-      {events && events.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.map((event: any) => {
-            const eventDate = event.date ? new Date(event.date) : null
-            const formattedDate = eventDate
-              ? eventDate.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'TBA'
+      {/* Hero Header */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#1b2668] via-[#233180] to-[#1a235c] text-white pt-16 pb-20 px-6 border-b border-blue-900">
+        {/* Background Watermark */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center overflow-hidden">
+          <span className="text-[22vw] font-serif font-black text-white select-none leading-none tracking-widest">
+            साहित्य
+          </span>
+        </div>
 
-            return (
-              <div
-                key={event._id}
-                className="group relative bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
-              >
-                <div>
-                  {/* Event Thumbnail */}
-                  <div className="relative h-48 w-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
-                    {event.image ? (
-                      <img
-                        src={urlFor(event.image).url()}
-                        alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-amber-500/10 via-rose-500/10 to-purple-500/10 flex items-center justify-center text-stone-400 text-xs font-semibold">
-                        No Banner Image
-                      </div>
-                    )}
+        <div className="max-w-5xl mx-auto relative z-10 text-center space-y-6">
+          {/* Faculty Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-blue-100 text-xs md:text-sm font-semibold shadow-inner">
+            <GraduationCap className="w-4 h-4 text-amber-300" />
+            <span>
+              Organized by <strong className="text-white">B. Tech in AI FACULTY</strong>
+            </span>
+          </div>
 
-                    {event.category && (
-                      <div className="absolute top-4 left-4">
-                        <Badge category={event.category} />
-                      </div>
-                    )}
-                  </div>
+          {/* Page Title */}
+          <div className="space-y-2">
+            <h1 className="text-5xl sm:text-7xl font-black tracking-tight drop-shadow-md">
+              साहित्यिक <span className="font-sans font-extrabold text-blue-200">Events</span>
+            </h1>
+            <p className="text-lg md:text-xl font-serif text-blue-100 italic">
+              &ldquo;Where Words Take Center Stage&rdquo;
+            </p>
+          </div>
 
-                  {/* Card Content */}
-                  <div className="p-6 space-y-3">
-                    <h2 className="text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100 group-hover:text-amber-500 transition-colors line-clamp-1">
-                      {event.title}
-                    </h2>
+          {/* Active Categories Bar */}
+          <div className="pt-2">
+            <div className="inline-flex items-center justify-center gap-4 px-6 py-2.5 rounded-2xl bg-white/10 border border-white/15 text-white font-bold text-xs md:text-sm tracking-wider uppercase backdrop-blur-sm">
+              <span className="flex items-center gap-1.5">
+                <BookOpen className="w-4 h-4 text-blue-300" /> Poetry
+              </span>
+              <span className="text-blue-400">•</span>
+              <span className="flex items-center gap-1.5">
+                <Theater className="w-4 h-4 text-blue-300" /> Storytelling
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                    {event.excerpt && (
-                      <p className="text-stone-600 dark:text-stone-400 text-sm line-clamp-2 leading-relaxed">
-                        {event.excerpt}
-                      </p>
-                    )}
-                  </div>
-                </div>
+      {/* Events Listing */}
+      <main className="max-w-6xl mx-auto px-6 py-14 space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white">
+              All Scheduled Events
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Browse upcoming poetry sessions, storytelling showcases, and literary meets.
+            </p>
+          </div>
+          <div className="text-xs font-bold px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 w-fit">
+            {events ? events.length : 0} Event{events?.length === 1 ? '' : 's'} Listed
+          </div>
+        </div>
 
-                {/* Footer Info & Action */}
-                <div className="p-6 pt-0 space-y-4">
-                  <div className="flex items-center justify-between text-xs text-stone-500 border-t border-stone-100 dark:border-stone-800/80 pt-4">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-amber-500" />
-                      <span>{formattedDate}</span>
+        {events && events.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event: any) => {
+              const imgUrl = event.bannerImage ? urlFor(event.bannerImage).url() : null
+              const eventDate = event.date
+                ? new Date(event.date).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'Date TBA'
+
+              return (
+                <div
+                  key={event._id}
+                  className="group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-blue-500 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Event Banner Image */}
+                    <div className="h-48 bg-blue-950 relative overflow-hidden">
+                      {imgUrl ? (
+                        <img
+                          src={imgUrl}
+                          alt={event.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-[#1b2668] to-[#233180] flex items-center justify-center p-6 text-center">
+                          <span className="text-3xl font-serif font-bold text-white/20 select-none">
+                            साहित्यिक
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Category Tag overlay */}
+                      {event.category && (
+                        <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-blue-950/80 backdrop-blur-md text-white text-xs font-semibold border border-white/20 flex items-center gap-1">
+                          <Tag className="w-3 h-3 text-blue-300" />
+                          {event.category}
+                        </div>
+                      )}
                     </div>
 
-                    {event.location && (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-rose-500" />
-                        <span className="truncate max-w-[120px]">{event.location}</span>
+                    {/* Card Content */}
+                    <div className="p-6 space-y-4">
+                      <h3 className="font-extrabold text-xl text-slate-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                        {event.title}
+                      </h3>
+
+                      {event.description && (
+                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                          {event.description}
+                        </p>
+                      )}
+
+                      <div className="space-y-2 pt-2 text-xs font-medium text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                          <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                          <span>{eventDate}</span>
+                        </div>
+
+                        {event.time && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                            <span>{event.time}</span>
+                          </div>
+                        )}
+
+                        {(event.venue || event.location) && (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                            <span>{event.venue || event.location}</span>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
 
-                  <Link
-                    href={`/events/${event.slug}`}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold text-sm group-hover:bg-amber-500 group-hover:text-white transition-all cursor-pointer"
-                  >
-                    View Event Details
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                  {/* Card Action */}
+                  <div className="p-6 pt-0">
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className="w-full py-3 px-4 rounded-xl bg-blue-50 dark:bg-blue-950/60 hover:bg-[#1b2668] text-blue-800 dark:text-blue-300 hover:text-white font-bold text-sm transition-all flex items-center justify-center gap-2 group-hover:bg-[#1b2668] group-hover:text-white shadow-xs"
+                    >
+                      View Details & Register
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-20 bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800">
-          <p className="text-stone-500">No events found in Sanity studio yet.</p>
-        </div>
-      )}
+              )
+            })}
+          </div>
+        ) : (
+          <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <Sparkles className="w-10 h-10 text-blue-600 mx-auto opacity-40" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
+              No Events Scheduled Right Now
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+              Check back soon for new poetry and storytelling schedules hosted by the B. Tech in AI Faculty.
+            </p>
+          </div>
+        )}
+      </main>
     </div>
   )
 }

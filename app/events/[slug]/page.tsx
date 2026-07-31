@@ -2,8 +2,8 @@ import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import Badge from '@/components/Badge'
-import { Calendar, MapPin, ArrowLeft, Ticket, User, Clock } from 'lucide-react'
+import { Calendar, MapPin, ArrowLeft, Ticket, Clock } from 'lucide-react'
+import SpeakerCard from '@/components/SpeakerCard'
 
 export const revalidate = 0
 
@@ -13,15 +13,17 @@ async function getEvent(slug: string) {
       _id,
       title,
       date,
+      venue,
       location,
-      category,
-      excerpt,
+      registrationLink,
       description,
-      image,
-      speaker->{
+      "bannerImage": coalesce(bannerImage, image),
+      speakers[]->{
+        _id,
         name,
         role,
-        photo,
+        bio,
+        "image": coalesce(image, photo),
         "slug": slug.current
       },
       "slug": slug.current
@@ -57,6 +59,10 @@ export default async function EventDetailPage(props: any) {
       })
     : null
 
+  const bannerUrl = event.bannerImage ? urlFor(event.bannerImage).url() : null
+  const eventLocation = event.venue || event.location
+  const registrationUrl = event.registrationLink || `/events/${slug}/register`
+
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 pt-28 pb-20 px-6 max-w-5xl mx-auto">
       {/* Back Link */}
@@ -71,10 +77,10 @@ export default async function EventDetailPage(props: any) {
       <div className="space-y-8">
         {/* Banner Image */}
         <div className="relative rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 shadow-sm">
-          {event.image ? (
+          {bannerUrl ? (
             <div className="relative h-72 md:h-96 w-full">
               <img
-                src={urlFor(event.image).url()}
+                src={bannerUrl}
                 alt={event.title}
                 className="w-full h-full object-cover"
               />
@@ -83,13 +89,6 @@ export default async function EventDetailPage(props: any) {
           ) : (
             <div className="h-48 md:h-64 bg-gradient-to-br from-amber-500/20 via-rose-500/20 to-purple-500/20 flex items-center justify-center">
               <span className="text-stone-400 text-sm">No Banner Image</span>
-            </div>
-          )}
-
-          {/* Category Badge Overlay */}
-          {event.category && (
-            <div className="absolute top-6 left-6">
-              <Badge category={event.category} />
             </div>
           )}
         </div>
@@ -102,52 +101,31 @@ export default async function EventDetailPage(props: any) {
               {event.title}
             </h1>
 
-            {event.excerpt && (
-              <p className="text-lg text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
-                {event.excerpt}
-              </p>
-            )}
-
             {/* Description Body */}
             <div className="pt-6 border-t border-stone-200 dark:border-stone-800/80">
               <h2 className="text-xl font-bold mb-4 text-stone-800 dark:text-stone-200">
                 About the Event
               </h2>
               <p className="text-stone-600 dark:text-stone-300 leading-relaxed whitespace-pre-line text-base">
-                {event.description || event.excerpt || 'No detailed description available for this event yet.'}
+                {event.description ||
+                  'No detailed description available for this event yet.'}
               </p>
             </div>
 
-            {/* Speaker Card */}
-            {event.speaker && (
+            {/* Interactive Speakers Section */}
+            {event.speakers && event.speakers.length > 0 && (
               <div className="pt-6 border-t border-stone-200 dark:border-stone-800/80">
-                <h2 className="text-xl font-bold mb-4">Featured Speaker</h2>
-                <Link
-                  href={`/speakers/${event.speaker.slug}`}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50 transition-all group"
-                >
-                  {event.speaker.photo ? (
-                    <img
-                      src={urlFor(event.speaker.photo).url()}
-                      alt={event.speaker.name}
-                      className="w-14 h-14 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
-                      <User className="w-6 h-6" />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="font-bold text-stone-900 dark:text-stone-100 group-hover:text-amber-500 transition-colors">
-                      {event.speaker.name}
-                    </h3>
-                    {event.speaker.role && (
-                      <p className="text-xs text-rose-500 dark:text-rose-400 font-semibold uppercase tracking-wider">
-                        {event.speaker.role}
-                      </p>
-                    )}
-                  </div>
-                </Link>
+                <h2 className="text-xl font-bold mb-1">
+                  {event.speakers.length > 1 ? 'Featured Speakers' : 'Featured Speaker'}
+                </h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
+                  Click on a speaker to view their profile and biography.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {event.speakers.map((sp: any, idx: number) => (
+                    <SpeakerCard key={sp._id || idx} speaker={sp} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -192,18 +170,18 @@ export default async function EventDetailPage(props: any) {
                   </div>
                 )}
 
-                {/* Location */}
-                {event.location && (
+                {/* Location / Venue */}
+                {eventLocation && (
                   <div className="flex items-start gap-3">
                     <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
                       <MapPin className="w-5 h-5" />
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider block">
-                        Location
+                        Venue / Location
                       </span>
                       <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">
-                        {event.location}
+                        {eventLocation}
                       </span>
                     </div>
                   </div>
@@ -212,13 +190,15 @@ export default async function EventDetailPage(props: any) {
 
               {/* Action Button */}
               <div className="pt-4 border-t border-stone-100 dark:border-stone-800">
-                <Link
-                  href={`/events/${slug}/register`}
+                <a
+                  href={registrationUrl}
+                  target={event.registrationLink ? '_blank' : '_self'}
+                  rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-semibold shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all text-center cursor-pointer"
                 >
                   <Ticket className="w-4 h-4" />
                   Register for Event
-                </Link>
+                </a>
               </div>
             </div>
           </div>

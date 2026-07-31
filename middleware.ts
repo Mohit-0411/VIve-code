@@ -4,8 +4,8 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/api/webhooks(.*)",  // keep webhooks public
-  "/studio(.*)",        // keep Sanity studio public if needed
+  "/studio(.*)",        // 👈 add this
+  "/api/webhooks(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

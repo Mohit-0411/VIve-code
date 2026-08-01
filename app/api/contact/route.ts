@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (!apiKey) {
+      console.error("RESEND_API_KEY is not configured.");
+      return NextResponse.json(
+        { message: "Server misconfiguration: missing API key." },
+        { status: 500 }
+      );
+    }
+
+    const resend = new Resend(apiKey);
     const body = await req.json();
     const { fullName, email, category, message } = body;
 
@@ -17,7 +26,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await resend.emails.send({
       from: "Sahityik Contact <onboarding@resend.dev>",
-      to: ["bsmohit112@gmail.com"], // Must match your Resend account email!
+      to: ["bsmohit112@gmail.com"],
       replyTo: email,
       subject: `New Inquiry: ${category || "General Inquiry"} - ${fullName}`,
       html: `
@@ -34,7 +43,7 @@ export async function POST(req: Request) {
     });
 
     if (error) {
-      console.error("Resend delivery error:", error);
+      console.error("Resend error:", error);
       return NextResponse.json(
         { message: error.message || "Failed to deliver email." },
         { status: 400 }

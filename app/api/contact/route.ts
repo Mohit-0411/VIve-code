@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await resend.emails.send({
       from: "Sahityik Contact <onboarding@resend.dev>",
-      to: ["bsmohit112@gmail.com"],
+      to: ["mohitsharmauprety@gmail.com"],
       replyTo: email,
       subject: `New Inquiry: ${category || "General Inquiry"} - ${fullName}`,
       html: `

@@ -2,7 +2,10 @@ import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, User, Clock, MessageSquare, Heart, Tag, Sparkles } from 'lucide-react'
+import { ArrowLeft, User, Clock, Tag, Sparkles } from 'lucide-react'
+import { currentUser } from '@clerk/nextjs/server'
+import { getLikesCount, getComments } from '@/app/actions/forum'
+import ForumInteractivity from '@/components/ForumInteractivity'
 
 export const revalidate = 0
 
@@ -22,9 +25,7 @@ async function getForumPost(slug: string) {
         role,
         "image": coalesce(image, photo)
       },
-      "authorName": authorName,
-      likes,
-      comments
+      "authorName": authorName
     }`,
     { slug }
   )
@@ -36,14 +37,31 @@ export default async function ForumPostPage(props: { params: Promise<{ slug: str
 
   if (!slug) notFound()
 
-  const post = await getForumPost(slug)
+  // Fetch Sanity Post & Current Clerk User simultaneously
+  const [post, user] = await Promise.all([
+    getForumPost(slug),
+    currentUser()
+  ])
 
   if (!post) notFound()
+
+  // Use Sanity _id (or fallback to slug) for Redis storage
+  const postId = post._id || slug
+  
+  // Fetch real-time likes and comments from Upstash Redis
+  const initialLikes = await getLikesCount(postId)
+  const initialComments = await getComments(postId)
 
   const authorName = post.author?.name || post.authorName || 'Anonymous'
   const authorImage = post.author?.image ? urlFor(post.author.image).url() : null
   const postDate = post.createdAt || post._createdAt
   const postBody = post.content || post.body
+
+  // Prepare fallback user details for Clerk
+  const currentUserId = user?.id || 'anonymous'
+  const currentUserName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : user?.username || 'Club Member'
 
   return (
     <main className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 pt-28 pb-20 px-6 max-w-4xl mx-auto">
@@ -126,16 +144,15 @@ export default async function ForumPostPage(props: { params: Promise<{ slug: str
           </div>
         )}
 
-        {/* Footer Stats */}
-        <div className="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center gap-6 text-xs font-bold text-stone-500 dark:text-stone-400">
-          <div className="flex items-center gap-1.5">
-            <Heart className="w-4 h-4 text-rose-500" />
-            <span>{post.likes ?? 0} Likes</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <MessageSquare className="w-4 h-4 text-amber-500" />
-            <span>{post.comments?.length ?? 0} Comments</span>
-          </div>
+        {/* Interactive Likes & Comments Powered by Upstash Redis */}
+        <div className="pt-4 border-t border-stone-100 dark:border-stone-800">
+          <ForumInteractivity
+            postId={postId}
+            userId={currentUserId}
+            userName={currentUserName}
+            initialLikes={initialLikes}
+            initialComments={initialComments}
+          />
         </div>
       </article>
     </main>

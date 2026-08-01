@@ -15,11 +15,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Send email via Resend
-    const data = await resend.emails.send({
-      from: "Sahityik Contact <onboarding@resend.dev>", // Resend's default sender for testing
-      to: ["bsmohit112@gmail.com"], // Your Gmail address where you want to receive inquiries
-      replyTo: email, // Replying directly responds to the person who filled out the form
+    const { data, error } = await resend.emails.send({
+      from: "Sahityik Contact <onboarding@resend.dev>",
+      to: ["bsmohit112@gmail.com"], // Must match your Resend account email!
+      replyTo: email,
       subject: `New Inquiry: ${category || "General Inquiry"} - ${fullName}`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; line-height: 1.6;">
@@ -34,14 +33,22 @@ export async function POST(req: Request) {
       `,
     });
 
+    if (error) {
+      console.error("Resend delivery error:", error);
+      return NextResponse.json(
+        { message: error.message || "Failed to deliver email." },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { message: "Inquiry received successfully!", data },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error("API Contact Error:", error);
+  } catch (err: any) {
+    console.error("API Contact Error:", err);
     return NextResponse.json(
-      { message: error.message || "Internal Server Error." },
+      { message: err.message || "Internal Server Error." },
       { status: 500 }
     );
   }

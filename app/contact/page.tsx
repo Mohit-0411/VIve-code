@@ -42,7 +42,7 @@ export default async function ContactPage() {
       </div>
 
       {/* Hero Header */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#1b2668] via-[#233180] to-[#1a235c] text-white pt-16 pb-20 px-6 border-b border-blue-900">
+      <section className="relative overflow-hidden bg-linear-to-b from-[#1b2668] via-[#233180] to-[#1a235c] text-white pt-16 pb-20 px-6 border-b border-blue-900">
         <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center overflow-hidden">
           <span className="text-[22vw] font-serif font-black text-white select-none leading-none tracking-widest">
             साहित्य

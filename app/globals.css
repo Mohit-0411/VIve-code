@@ -1,20 +1,13 @@
 @import "tailwindcss";
 
-@layer utilities {
-  /* Subtle ambient lighting for hero & header sections */
-  .bg-radial-glow {
-    background-image: radial-gradient(
-      circle at 50% 0%,
-      rgba(245, 158, 11, 0.15),
-      transparent 70%
-    );
-  }
+@custom-variant dark (&:where(.dark, .dark *));
 
-  .dark .bg-radial-glow {
-    background-image: radial-gradient(
-      circle at 50% 0%,
-      rgba(245, 158, 11, 0.25),
-      transparent 70%
-    );
-  }
+@utility bg-radial-glow {
+  background-image: radial-gradient(
+    circle at 50% 0%,
+    rgba(245, 158, 11, 0.15),
+    transparent 70%
+  );
 }
+
+/* Now you can just use `bg-radial-glow dark:bg-radial-glow` or extend it natively */

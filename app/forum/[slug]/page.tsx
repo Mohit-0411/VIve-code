@@ -80,7 +80,7 @@ export default async function ForumPostPage(props: { params: Promise<{ slug: str
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-stone-100 dark:border-stone-800 pb-6">
           <div className="flex items-center gap-3">
             {/* Author Avatar */}
-            <div className="w-12 h-12 rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex-shrink-0 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shrink-0 flex items-center justify-center">
               {authorImage ? (
                 <img
                   src={authorImage}

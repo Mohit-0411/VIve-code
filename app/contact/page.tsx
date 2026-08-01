@@ -1,11 +1,9 @@
 import {
   Mail,
   Phone,
-  MapPin,
   GraduationCap,
   BookOpen,
   Theater,
-  Clock,
 } from 'lucide-react'
 import { client } from '@/sanity/lib/client'
 import ContactForm from '@/components/ContactForm'
@@ -28,7 +26,6 @@ export default async function ContactPage() {
 
   const email = contactData?.email || 'ai.department@gomendracollege.edu.np'
   const phone = contactData?.phoneNumber || '+977 9705807155'
-  const address = contactData?.address || 'Gomendra Multiple College, Birtamode-4, Jhapa'
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
@@ -84,7 +81,7 @@ export default async function ContactPage() {
       <main className="max-w-6xl mx-auto px-6 py-14">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
-          {/* Left Column: Contact & Location Info */}
+          {/* Left Column: Contact Info */}
           <div className="lg:col-span-5 space-y-6">
             <div>
               <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white">
@@ -97,18 +94,6 @@ export default async function ContactPage() {
 
             {/* Info Cards */}
             <div className="space-y-4 pt-2">
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0 font-bold">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">Campus Address</h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-                    {address}
-                  </p>
-                </div>
-              </div>
-
               <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0 font-bold">
                   <Phone className="w-5 h-5" />
@@ -129,18 +114,6 @@ export default async function ContactPage() {
                   <h4 className="font-bold text-sm text-slate-900 dark:text-white">Email Us</h4>
                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                     {email}
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0 font-bold">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">Desk Hours</h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                    Sunday – Friday: 10:00 AM – 4:00 PM
                   </p>
                 </div>
               </div>
